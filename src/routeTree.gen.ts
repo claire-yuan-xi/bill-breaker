@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BillRouteImport } from './routes/bill'
 import { Route as AdminAbuseRouteImport } from './routes/admin.abuse'
+import { Route as AdminMlRouteImport } from './routes/admin.ml'
 import { Route as ApiExplainBillRouteImport } from './routes/api/explain-bill'
 import { Route as BSlugRouteImport } from './routes/b.$slug'
 import { Route as ApiPublicResolveRouteImport } from './routes/api/public/resolve'
@@ -32,6 +33,11 @@ const BillRoute = BillRouteImport.update({
 const AdminAbuseRoute = AdminAbuseRouteImport.update({
   id: '/admin/abuse',
   path: '/admin/abuse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminMlRoute = AdminMlRouteImport.update({
+  id: '/admin/ml',
+  path: '/admin/ml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiExplainBillRoute = ApiExplainBillRouteImport.update({
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bill': typeof BillRoute
   '/admin/abuse': typeof AdminAbuseRoute
+  '/admin/ml': typeof AdminMlRoute
   '/api/explain-bill': typeof ApiExplainBillRoute
   '/b/$slug': typeof BSlugRoute
   '/api/public/resolve': typeof ApiPublicResolveRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bill': typeof BillRoute
   '/admin/abuse': typeof AdminAbuseRoute
+  '/admin/ml': typeof AdminMlRoute
   '/api/explain-bill': typeof ApiExplainBillRoute
   '/b/$slug': typeof BSlugRoute
   '/api/public/resolve': typeof ApiPublicResolveRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/bill': typeof BillRoute
   '/admin/abuse': typeof AdminAbuseRoute
+  '/admin/ml': typeof AdminMlRoute
   '/api/explain-bill': typeof ApiExplainBillRoute
   '/b/$slug': typeof BSlugRoute
   '/api/public/resolve': typeof ApiPublicResolveRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/bill'
     | '/admin/abuse'
+    | '/admin/ml'
     | '/api/explain-bill'
     | '/b/$slug'
     | '/api/public/resolve'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/'
     | '/bill'
     | '/admin/abuse'
+    | '/admin/ml'
     | '/api/explain-bill'
     | '/b/$slug'
     | '/api/public/resolve'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/'
     | '/bill'
     | '/admin/abuse'
+    | '/admin/ml'
     | '/api/explain-bill'
     | '/b/$slug'
     | '/api/public/resolve'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BillRoute: typeof BillRoute
   AdminAbuseRoute: typeof AdminAbuseRoute
+  AdminMlRoute: typeof AdminMlRoute
   ApiExplainBillRoute: typeof ApiExplainBillRoute
   BSlugRoute: typeof BSlugRoute
   ApiPublicResolveRoute: typeof ApiPublicResolveRoute
@@ -170,6 +183,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/abuse'
       fullPath: '/admin/abuse'
       preLoaderRoute: typeof AdminAbuseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/ml': {
+      id: '/admin/ml'
+      path: '/admin/ml'
+      fullPath: '/admin/ml'
+      preLoaderRoute: typeof AdminMlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/explain-bill': {
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BillRoute: BillRoute,
   AdminAbuseRoute: AdminAbuseRoute,
+  AdminMlRoute: AdminMlRoute,
   ApiExplainBillRoute: ApiExplainBillRoute,
   BSlugRoute: BSlugRoute,
   ApiPublicResolveRoute: ApiPublicResolveRoute,
