@@ -6,8 +6,8 @@ fine-tuned model.
 
 ## Stack
 
-- Python: FastAPI server, Jinja HTML templates, SQLite for the cache, share
-  links and rate limits (`billbreaker/`)
+- Python: FastAPI server, Jinja HTML templates, SQLite (Turso when deployed)
+  for the cache, share links and rate limits (`billbreaker/`)
 - Notebooks: the model training notebook and a walkthrough of the site's
   pipeline (`notebooks/`)
 - Browser: small JavaScript modules for animation (GSAP, Lenis) and the
@@ -62,4 +62,4 @@ docs/               abuse monitoring
 
 ## Hosting
 
-Render, set up by `render.yaml`; steps in [docs/deploy-render.md](docs/deploy-render.md).
+Vercel (free) with a free Turso database; steps in [docs/deploy-vercel.md](docs/deploy-vercel.md).

@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 import httpx
 
 from ..config import settings
-from ..db import connection
+from .. import db
 
 log = logging.getLogger("billbreaker.abuse")
 
@@ -34,7 +34,7 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def record(event: Event) -> None:
+async def record(event: Event) -> None:
     log.warning(
         "[abuse] %s",
         json.dumps(
@@ -51,24 +51,21 @@ def record(event: Event) -> None:
         ),
     )
     try:
-        with connection() as db:
-            db.execute(
-                "INSERT INTO abuse_events (ts, identifier, endpoint, reason, count, limit_value, "
-                "window_seconds, meta) VALUES (?, ?, ?, ?, ?, ?, ?, '{}')",
-                (_now(), event.identifier, event.endpoint, event.reason, event.count, event.limit, event.window_s),
-            )
+        await db.execute(
+            "INSERT INTO abuse_events (ts, identifier, endpoint, reason, count, limit_value, "
+            "window_seconds, meta) VALUES (?, ?, ?, ?, ?, ?, ?, '{}')",
+            (_now(), event.identifier, event.endpoint, event.reason, event.count, event.limit, event.window_s),
+        )
     except Exception as exc:  # noqa: BLE001
         log.error("abuse event insert failed: %s", exc)
 
 
-def recent_events(limit: int) -> list[dict]:
-    with connection() as db:
-        rows = db.execute(
-            "SELECT id, ts, identifier, endpoint, reason, count, limit_value, window_seconds "
-            "FROM abuse_events ORDER BY id DESC LIMIT ?",
-            (limit,),
-        ).fetchall()
-    return [dict(r) for r in rows]
+async def recent_events(limit: int) -> list[dict]:
+    return await db.query(
+        "SELECT id, ts, identifier, endpoint, reason, count, limit_value, window_seconds "
+        "FROM abuse_events ORDER BY id DESC LIMIT ?",
+        (limit,),
+    )
 
 
 def webhook_url() -> str | None:
@@ -108,10 +105,10 @@ async def maybe_alert(event: Event) -> None:
     from .rate_limit import _bump, count_only
 
     try:
-        incidents = count_only(f"abuse-incident:{event.identifier}", 3600)
+        incidents = await count_only(f"abuse-incident:{event.identifier}", 3600)
         if incidents < settings.abuse_alert_threshold:
             return
-        if not _bump(f"abuse-alert:{event.identifier}", 1, settings.abuse_alert_cooldown_s).allowed:
+        if not (await _bump(f"abuse-alert:{event.identifier}", 1, settings.abuse_alert_cooldown_s)).allowed:
             return
         result = await post_with_retry(
             url,

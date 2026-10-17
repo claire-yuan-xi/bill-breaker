@@ -99,7 +99,7 @@ async def explain_bill(request: Request):
 
     # 1) Cache hit: free to anyone, no rate limit.
     try:
-        cached = analysis_cache.load_fresh(state, cache_bill, text_hash)
+        cached = await analysis_cache.load_fresh(state, cache_bill, text_hash)
     except Exception as exc:  # noqa: BLE001
         log.error("cache lookup failed: %s", exc)
         cached = None
@@ -137,13 +137,13 @@ async def explain_bill(request: Request):
             sections = []
             for step in steps:
                 sections.append({"event": step.event, "data": await step.run()})
-            analysis_cache.save(state, cache_bill, text_hash, title, source_url, sections)
+            await analysis_cache.save(state, cache_bill, text_hash, title, source_url, sections)
             payload = {"title": title, "sourceUrl": source_url, "sections": sections}
             return JSONResponse(_flat(payload, cached=False, **source_meta), headers={"Cache-Control": "no-store"})
         except Exception as exc:  # noqa: BLE001 - every failure falls back to the last good analysis
             code = getattr(exc, "code", type(exc).__name__)
             log.error("json pipeline error: %s", code)
-            stale = analysis_cache.load_latest(state, cache_bill)
+            stale = await analysis_cache.load_latest(state, cache_bill)
             if stale:
                 payload, created_at = stale
                 reason = "rate_limited" if code == "RATE_LIMIT" else "ai_unavailable"
@@ -165,7 +165,7 @@ async def explain_bill(request: Request):
                 collected.append({"event": step.event, "data": data})
                 yield section_event(step.event, data)
             yield sse("done", {"cached": False})
-            analysis_cache.save(state, cache_bill, text_hash, title, source_url, collected)
+            await analysis_cache.save(state, cache_bill, text_hash, title, source_url, collected)
         except Exception as exc:  # noqa: BLE001 - the client retries in JSON mode
             code = getattr(exc, "code", type(exc).__name__)
             log.error("sse pipeline error: %s", code)

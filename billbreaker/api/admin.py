@@ -28,7 +28,7 @@ async def abuse_events(data: AbuseIn):
         return {"ok": False, "error": "ABUSE_ADMIN_TOKEN not configured on the server."}
     if not hmac.compare_digest(data.token.encode(), expected.encode()):
         return {"ok": False, "error": "Invalid token."}
-    return {"ok": True, "events": abuse.recent_events(data.limit)}
+    return {"ok": True, "events": await abuse.recent_events(data.limit)}
 
 
 class RankIn(BaseModel):

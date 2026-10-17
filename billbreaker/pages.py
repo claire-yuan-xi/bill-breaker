@@ -27,7 +27,7 @@ async def bill(request: Request, state: str = "US", number: str = ""):
 
 @router.get("/b/{slug}", response_class=HTMLResponse)
 async def shared(request: Request, slug: str):
-    row = shares.get(slug) if SLUG.match(slug) else None
+    row = await shares.get(slug) if SLUG.match(slug) else None
     if not row:
         return templates.TemplateResponse(request, "share_missing.html", status_code=404)
     context = {"row": row, "sections": render_share(row["payload"])}
