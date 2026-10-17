@@ -7,7 +7,7 @@ held out for testing. Runs on Apple Silicon (MPS), CUDA or CPU.
     uv run --python 3.12 --with-requirements ml/requirements-train.txt \
         python ml/train.py --bills ~/Downloads/billsum_100_bills.zip --out ml/bill_breaker_model
 
-No mid-run checkpoints are written, to keep disk use near the size of the model.
+A checkpoint is kept every 20 steps in ml/.work; rerunning the same command resumes from it.
 """
 
 from __future__ import annotations
@@ -102,9 +102,14 @@ def main() -> None:
     tok = AutoTokenizer.from_pretrained(BASE_MODEL)
     model = AutoModelForSeq2SeqLM.from_pretrained(BASE_MODEL)
 
+    # Fixed-length padding: on MPS every new tensor shape builds and keeps another
+    # compute graph, so variable-length batches grow memory until the run dies.
     def preprocess(batch):
-        enc = tok([PROMPT + t for t in batch["text"]], max_length=args.max_source, truncation=True)
-        enc["labels"] = tok(text_target=batch["summary"], max_length=MAX_TARGET, truncation=True)["input_ids"]
+        enc = tok([PROMPT + t for t in batch["text"]], max_length=args.max_source,
+                  truncation=True, padding="max_length")
+        labels = tok(text_target=batch["summary"], max_length=MAX_TARGET,
+                     truncation=True, padding="max_length")["input_ids"]
+        enc["labels"] = [[t if t != tok.pad_token_id else -100 for t in row] for row in labels]
         return enc
 
     cols = splits["train"].column_names
@@ -122,7 +127,9 @@ def main() -> None:
             learning_rate=3e-4,
             num_train_epochs=args.epochs,
             eval_strategy="epoch",
-            save_strategy="no",
+            save_strategy="steps",
+            save_steps=20,
+            save_total_limit=1,
             gradient_checkpointing=True,
             logging_steps=5,
             report_to="none",
@@ -133,7 +140,10 @@ def main() -> None:
         data_collator=DataCollatorForSeq2Seq(tok, model=model),
         callbacks=[FreeMpsCache()],
     )
-    result = trainer.train()
+    resume = any(args.work.glob("checkpoint-*"))
+    if resume:
+        print("Resuming from the last checkpoint in", args.work, flush=True)
+    result = trainer.train(resume_from_checkpoint=resume or None)
     metrics = {**result.metrics, **trainer.evaluate()}
 
     model = trainer.model.eval()
