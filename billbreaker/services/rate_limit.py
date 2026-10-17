@@ -68,16 +68,11 @@ async def bump(identifier: str, limit: int, window_s: int, endpoint: str | None 
 
 
 def client_ip(request: Request) -> str:
-    h = request.headers
-    forwarded = h.get("forwarded", "")
-    candidates = [
-        h.get("cf-connecting-ip"),
-        h.get("x-real-ip"),
-        (h.get("x-forwarded-for") or "").split(",")[0].strip(),
-        forwarded.split("for=", 1)[1].split(";")[0].strip('" ') if "for=" in forwarded else "",
-        request.client.host if request.client else "",
-    ]
-    for c in candidates:
-        if c and len(c) < 64:
-            return c
-    return "unknown"
+    """The caller's address as the hosting proxy saw it.
+
+    Render's proxy appends the real client to X-Forwarded-For, so the last entry is
+    trusted and earlier ones (which a client can send itself) are ignored.
+    """
+    hops = [h.strip() for h in (request.headers.get("x-forwarded-for") or "").split(",") if h.strip()]
+    candidate = hops[-1] if hops else (request.client.host if request.client else "")
+    return candidate if candidate and len(candidate) < 64 else "unknown"

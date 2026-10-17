@@ -62,7 +62,4 @@ docs/               abuse monitoring
 
 ## Hosting
 
-Any host that runs Python works (Render, Fly.io, Railway). Start command:
-`uvicorn billbreaker.main:app --host 0.0.0.0 --port $PORT`. Point
-`DATABASE_PATH` at a persistent disk so share links and the cache survive
-restarts.
+Render, set up by `render.yaml`; steps in [docs/deploy-render.md](docs/deploy-render.md).

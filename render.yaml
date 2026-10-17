@@ -1,0 +1,36 @@
+# Render Blueprint: New > Blueprint in the Render dashboard, then pick this repo.
+services:
+  - type: web
+    name: billbreaker
+    runtime: python
+    plan: starter
+    region: oregon
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn billbreaker.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /favicon.ico
+    autoDeploy: true
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1
+    domains:
+      - billbreaker.org
+      - www.billbreaker.org
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: DATABASE_PATH
+        value: /var/data/billbreaker.db
+      - key: GEMINI_MODEL
+        value: gemini-flash-latest
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENSTATES_API_KEY
+        sync: false
+      - key: ML_ENDPOINT
+        sync: false
+      - key: ABUSE_ADMIN_TOKEN
+        generateValue: true
+      - key: ABUSE_ALERT_WEBHOOK_URL
+        sync: false
