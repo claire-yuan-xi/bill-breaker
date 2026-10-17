@@ -56,3 +56,13 @@ def test_only_http_links_are_rendered():
 def test_resolve_refuses_hosts_off_the_allowlist(client):
     res = client.get("/api/public/resolve", params={"url": "https://evil.com/x"}, follow_redirects=False)
     assert res.status_code == 403
+
+
+def test_client_ip_ignores_spoofed_forwarding_headers():
+    from starlette.requests import Request
+
+    from billbreaker.services.rate_limit import client_ip
+
+    headers = [(b"x-forwarded-for", b"1.1.1.1, 203.0.113.9"), (b"cf-connecting-ip", b"9.9.9.9")]
+    request = Request({"type": "http", "headers": headers, "client": ("10.0.0.1", 1)})
+    assert client_ip(request) == "203.0.113.9"
