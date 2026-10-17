@@ -17,7 +17,7 @@ async def explain_with_model(text: str, title: str, profile: dict) -> dict:
     if not settings.ml_endpoint:
         raise ModelError("No model endpoint configured (ML_ENDPOINT).")
     try:
-        async with httpx.AsyncClient(timeout=120) as client:
+        async with httpx.AsyncClient(timeout=300) as client:
             res = await client.post(
                 settings.ml_endpoint, json={"text": text, "title": title, "profile": profile}
             )

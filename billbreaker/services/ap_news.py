@@ -1,10 +1,11 @@
-"""Live legislation headlines from AP, via Google News RSS filtered to apnews.com."""
+"""Live legislation headlines from AP: Google News RSS first, Bing News when Google refuses."""
 
 import asyncio
 import logging
 
 import httpx
 
+from .bing_news import fetch_bing_ap_items
 from .google_news import ap_search_url, decode_google_news_link
 from .text import clean_title, extract_tag
 
@@ -32,19 +33,28 @@ def parse_feed(xml: str) -> list[dict]:
     return items
 
 
-async def legislation_news() -> dict:
-    try:
-        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
-            res = await client.get(FEED_URL, headers={"User-Agent": "Mozilla/5.0 BillBreaker"})
-            if res.status_code != 200:
-                return {"items": [], "error": f"Feed unavailable ({res.status_code})"}
-            items = parse_feed(res.text)
-            decoded = await asyncio.gather(
-                *(decode_google_news_link(it["link"], client) for it in items)
-            )
-    except httpx.HTTPError as exc:
-        log.warning("AP feed error: %s", exc)
-        return {"items": [], "error": "Could not load live headlines"}
+async def _google_items(client: httpx.AsyncClient) -> list[dict]:
+    res = await client.get(FEED_URL, headers={"User-Agent": "Mozilla/5.0 BillBreaker"})
+    if res.status_code != 200:
+        return []
+    items = parse_feed(res.text)
+    decoded = await asyncio.gather(*(decode_google_news_link(it["link"], client) for it in items))
     for item, url in zip(items, decoded):
         item["link"] = url or ap_search_url(clean_title(item["title"]))
-    return {"items": items, "error": None}
+    return items
+
+
+async def legislation_news() -> dict:
+    async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+        try:
+            items = await _google_items(client)
+            if items:
+                return {"items": items, "error": None}
+        except httpx.HTTPError as exc:
+            log.warning("Google News feed error: %s", exc)
+        try:
+            items = await fetch_bing_ap_items(client)
+        except httpx.HTTPError as exc:
+            log.warning("Bing News feed error: %s", exc)
+            return {"items": [], "error": "Could not load live headlines"}
+    return {"items": items, "error": None if items else "No live headlines right now"}
