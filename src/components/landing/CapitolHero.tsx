@@ -13,8 +13,8 @@ const PHOTO_SCENE = {
   src: PHOTO,
   depthSrc: DEPTH,
   focus: [0.5, 0.62] as [number, number],
-  // Matches the <img> object-position below: 50%/38% across, 40% down.
-  anchorFor: (w: number): [number, number] => (w >= 768 ? [0.38, 0.6] : [0.5, 0.6]),
+  // Matches the <img> object-position below: centered across, 40% down.
+  anchorFor: (): [number, number] => [0.5, 0.6],
 };
 
 export function CapitolHero({ onSearch, onPaste }: Props) {
