@@ -1,8 +1,13 @@
 # Deploy on Render
 
-The site runs as one Render web service from `render.yaml`. The Starter plan
-is needed for the disk that keeps share links and the analysis cache across
-restarts.
+The site runs as one Render web service from `render.yaml` on the free plan.
+No card is needed. Two limits come with it:
+
+- After 15 minutes with no visitors the site sleeps, and the next visit takes
+  about a minute to load.
+- There is no disk, so share links and saved AI breakdowns are wiped whenever
+  the service restarts or redeploys. Saved bills are unaffected because they
+  live in each visitor's browser.
 
 ## First deploy
 
