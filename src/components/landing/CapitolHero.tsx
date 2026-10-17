@@ -3,7 +3,7 @@ import { gsap, prefersReducedMotion } from "@/lib/motion";
 import { usePress } from "@/lib/press";
 import { usePhotoScene } from "./use-photo-scene";
 
-type Props = { onSearch: () => void; onPaste: () => void; headlineCount: number };
+type Props = { onSearch: () => void; onPaste: () => void };
 
 // Public-domain photograph; see public/images/CREDITS.md for source and license.
 const PHOTO = "/images/capitol.jpg";
@@ -13,11 +13,11 @@ const PHOTO_SCENE = {
   src: PHOTO,
   depthSrc: DEPTH,
   focus: [0.5, 0.62] as [number, number],
-  // Matches the <img> object-position below: 50%/38% across, 40% down.
-  anchorFor: (w: number): [number, number] => (w >= 768 ? [0.38, 0.6] : [0.5, 0.6]),
+  // Matches the <img> object-position below: centered across, 40% down.
+  anchorFor: (): [number, number] => [0.5, 0.6],
 };
 
-export function CapitolHero({ onSearch, onPaste, headlineCount }: Props) {
+export function CapitolHero({ onSearch, onPaste }: Props) {
   const sectionRef = useRef<HTMLElement>(null);
   const photoRef = useRef<HTMLDivElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
@@ -112,7 +112,7 @@ export function CapitolHero({ onSearch, onPaste, headlineCount }: Props) {
             onLoad={() => setLoaded(true)}
             onError={() => setFailed(true)}
             className={
-              "h-full w-full object-cover object-[50%_40%] md:object-[38%_40%] transition-opacity duration-1000 " +
+              "h-full w-full object-cover object-[50%_40%] transition-opacity duration-1000 " +
               (loaded ? "opacity-100" : "opacity-0")
             }
           />
@@ -143,23 +143,16 @@ export function CapitolHero({ onSearch, onPaste, headlineCount }: Props) {
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(14,17,24,0.82)_0%,rgba(14,17,24,0.4)_45%,rgba(14,17,24,0)_72%),linear-gradient(0deg,rgba(14,17,24,0.75)_0%,rgba(14,17,24,0)_45%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_60%_at_50%_55%,rgba(14,17,24,0)_0%,rgba(14,17,24,0.55)_100%),linear-gradient(0deg,rgba(14,17,24,0.7)_0%,rgba(14,17,24,0)_40%)]"
       />
 
       <div
         ref={copyRef}
-        className="relative mx-auto flex h-full max-w-6xl flex-col justify-end px-6 pb-16 md:pb-24"
+        className="relative mx-auto flex h-full max-w-6xl flex-col items-center justify-center px-6 pt-24 text-center"
       >
-        <div
-          data-hero-fade
-          className="mb-5 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/80"
-        >
-          <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
-          <span>{headlineCount ? `${headlineCount} live AP stories` : "Live AP news"}</span>
-        </div>
         <h1
           id="hero-title"
-          className="font-serif text-6xl font-bold leading-[0.95] tracking-tight md:text-8xl"
+          className="font-serif text-6xl font-bold leading-[0.95] tracking-tight mix-blend-overlay md:text-9xl"
         >
           <span className="block overflow-hidden pb-1">
             <span data-hero-line className="block">
@@ -168,15 +161,12 @@ export function CapitolHero({ onSearch, onPaste, headlineCount }: Props) {
           </span>
           <span className="block overflow-hidden pb-2">
             <span data-hero-line className="block">
-              in plain{" "}
-              <span className="underline decoration-accent decoration-[5px] underline-offset-[14px]">
-                English.
-              </span>
+              in plain English.
             </span>
           </span>
         </h1>
 
-        <div data-hero-fade className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div data-hero-fade className="mt-10 flex flex-col items-center gap-4 sm:flex-row">
           <button
             ref={searchRef}
             type="button"

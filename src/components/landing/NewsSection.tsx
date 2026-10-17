@@ -124,7 +124,7 @@ export function NewsSection(props: Props) {
             >
               Today on the floor.
             </h2>
-            <div className="mt-2 text-xs text-muted-foreground" aria-live="polite">
+            <div className="sr-only" aria-live="polite">
               {headlines.length === totalAll
                 ? `${totalAll} stories`
                 : `${headlines.length} of ${totalAll} stories`}

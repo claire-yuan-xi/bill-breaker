@@ -124,7 +124,6 @@ function Index() {
         <CapitolHero
           onSearch={() => openSearch("number")}
           onPaste={() => openSearch("paste")}
-          headlineCount={items.length}
         />
       </div>
 
