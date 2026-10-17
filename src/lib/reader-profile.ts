@@ -30,7 +30,7 @@ export const QUESTIONS: Question[] = [
   {
     key: "age",
     label: "Age",
-    choices: ["Under 18", "18–24", "25–44", "45–64", "65+"],
+    choices: ["Under 18", "18-24", "25-44", "45-64", "65+"],
   },
   {
     key: "work",
@@ -57,7 +57,7 @@ export const QUESTIONS: Question[] = [
   {
     key: "income",
     label: "Household income",
-    choices: ["Under $30k", "$30–75k", "$75–150k", "Over $150k"],
+    choices: ["Under $30k", "$30-75k", "$75-150k", "Over $150k"],
   },
   {
     key: "interests",

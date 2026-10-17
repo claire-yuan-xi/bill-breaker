@@ -80,7 +80,7 @@ export function SavedBillsButton({
             onClick={() => setOpen(false)}
             className="mt-auto pt-4 text-[11px] uppercase tracking-[0.2em] text-muted-foreground underline underline-offset-4 hover:text-foreground"
           >
-            Back up &amp; restore options
+            Back up &amp; restore
           </a>
         </SheetContent>
       </Sheet>

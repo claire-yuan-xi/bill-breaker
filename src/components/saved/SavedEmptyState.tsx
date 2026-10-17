@@ -11,10 +11,9 @@ export function SavedEmptyState({ onSearch }: { onSearch?: () => void }) {
             <Bookmark className="h-5 w-5" />
           </span>
           <div className="min-w-0">
-            <p className="font-serif text-2xl font-bold">Nothing saved yet.</p>
+            <p className="font-serif text-2xl font-bold">Nothing saved yet</p>
             <p className="mt-1 max-w-md text-sm leading-relaxed text-muted-foreground">
-              Open any bill and press <strong className="text-foreground">Save bill</strong>. It
-              lands here so you can come back to it. No account needed; it's kept in this browser.
+              Open a bill and press <strong className="text-foreground">Save bill</strong>
             </p>
           </div>
         </div>
@@ -25,7 +24,7 @@ export function SavedEmptyState({ onSearch }: { onSearch?: () => void }) {
             onClick={onSearch}
             className="relative shrink-0 overflow-hidden bg-foreground px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-background hover:bg-foreground/85"
           >
-            Find a bill to save{" "}
+            Find a bill{" "}
             <span data-press-arrow className="inline-block">
               →
             </span>

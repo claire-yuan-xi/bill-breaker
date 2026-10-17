@@ -122,7 +122,7 @@ export function NewsSection(props: Props) {
               id={`${id}-title`}
               className="font-serif text-5xl font-bold tracking-tight md:text-6xl"
             >
-              Today on the floor.
+              Today on the floor
             </h2>
             <div className="sr-only" aria-live="polite">
               {headlines.length === totalAll
