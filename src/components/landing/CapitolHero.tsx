@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/motion";
 import { usePress } from "@/lib/press";
 import { usePhotoScene } from "./use-photo-scene";
@@ -26,6 +26,13 @@ export function CapitolHero({ onSearch, onPaste, headlineCount }: Props) {
   const pasteRef = usePress<HTMLButtonElement>();
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
+  // A cached photo can finish loading before hydration, so onLoad never fires; check on mount.
+  const imgRef = useCallback((img: HTMLImageElement | null) => {
+    if (img?.complete) {
+      if (img.naturalWidth > 0) setLoaded(true);
+      else setFailed(true);
+    }
+  }, []);
   // Once the WebGL pass is drawing, it owns depth, camera motion, light and dusk.
   const deep = usePhotoScene(canvasRef, sectionRef, PHOTO_SCENE);
 
@@ -96,6 +103,7 @@ export function CapitolHero({ onSearch, onPaste, headlineCount }: Props) {
       >
         {!failed && (
           <img
+            ref={imgRef}
             data-photo
             src={PHOTO}
             alt=""
