@@ -121,10 +121,7 @@ function Index() {
       </div>
 
       <div ref={heroRef} id="hero">
-        <CapitolHero
-          onSearch={() => openSearch("number")}
-          onPaste={() => openSearch("paste")}
-        />
+        <CapitolHero onSearch={() => openSearch("number")} onPaste={() => openSearch("paste")} />
       </div>
 
       <RecentBills onChange={setRecentCount} />
@@ -146,11 +143,6 @@ function Index() {
       <SavedBillsSection onSearch={() => openSearch("number")} />
 
       <SearchCta onSearch={() => openSearch("number")} onPaste={() => openSearch("paste")} />
-
-      <footer className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-10 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-        <span>Non-partisan · Not legal advice</span>
-        <span>News: AP · Bills: Congress.gov, state legislatures</span>
-      </footer>
 
       <BillDrift avoid={["#news", "#saved", "[data-bill-avoid]"]} />
       <FloatingExplain after="#hero" onClick={() => openSearch("number")} />

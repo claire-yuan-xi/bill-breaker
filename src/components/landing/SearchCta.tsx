@@ -12,7 +12,7 @@ export function SearchCta({ onSearch, onPaste }: { onSearch: () => void; onPaste
             id="cta-title"
             className="font-serif text-5xl font-bold leading-[1.02] tracking-tight md:text-7xl"
           >
-            Got a bill number?
+            Got a bill number
           </h2>
         </div>
         <div data-bill-avoid className="flex flex-col gap-3 md:col-span-5">
