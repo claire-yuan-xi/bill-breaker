@@ -29,6 +29,7 @@ from transformers import (
     DataCollatorForSeq2Seq,
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
+    TrainerCallback,
 )
 
 SEED = 42
@@ -55,6 +56,14 @@ def read_bills(zip_path: Path) -> list[dict]:
     return rows
 
 
+class FreeMpsCache(TrainerCallback):
+    """PyTorch's MPS allocator keeps freed blocks; release them each step or a 16 GB Mac runs out."""
+
+    def on_step_end(self, args, state, control, **kwargs):
+        if torch.backends.mps.is_available():
+            torch.mps.empty_cache()
+
+
 def device() -> str:
     if torch.cuda.is_available():
         return "cuda"
@@ -71,6 +80,8 @@ def main() -> None:
     # Batch 1 x 16 and Adafactor keep a 16 GB Mac out of swap; same effective batch as the notebook.
     ap.add_argument("--batch", type=int, default=1)
     ap.add_argument("--optim", default="adafactor")
+    # Tokens of bill text seen in training; 512 fits a 16 GB Mac, 1024 matches the Colab notebook.
+    ap.add_argument("--max-source", type=int, default=MAX_SOURCE)
     ap.add_argument("--drive", type=Path, help="Folder to copy the finished model into (e.g. Google Drive)")
     args = ap.parse_args()
 
@@ -92,7 +103,7 @@ def main() -> None:
     model = AutoModelForSeq2SeqLM.from_pretrained(BASE_MODEL)
 
     def preprocess(batch):
-        enc = tok([PROMPT + t for t in batch["text"]], max_length=MAX_SOURCE, truncation=True)
+        enc = tok([PROMPT + t for t in batch["text"]], max_length=args.max_source, truncation=True)
         enc["labels"] = tok(text_target=batch["summary"], max_length=MAX_TARGET, truncation=True)["input_ids"]
         return enc
 
@@ -120,6 +131,7 @@ def main() -> None:
         train_dataset=train_tok,
         eval_dataset=val_tok,
         data_collator=DataCollatorForSeq2Seq(tok, model=model),
+        callbacks=[FreeMpsCache()],
     )
     result = trainer.train()
     metrics = {**result.metrics, **trainer.evaluate()}
