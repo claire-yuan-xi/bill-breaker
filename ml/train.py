@@ -68,6 +68,9 @@ def main() -> None:
     ap.add_argument("--work", type=Path, default=Path("ml/.work"))
     ap.add_argument("--n-train", type=int, default=2000)
     ap.add_argument("--epochs", type=float, default=2)
+    # Batch 1 x 16 and Adafactor keep a 16 GB Mac out of swap; same effective batch as the notebook.
+    ap.add_argument("--batch", type=int, default=1)
+    ap.add_argument("--optim", default="adafactor")
     ap.add_argument("--drive", type=Path, help="Folder to copy the finished model into (e.g. Google Drive)")
     args = ap.parse_args()
 
@@ -101,9 +104,10 @@ def main() -> None:
         model=model,
         args=Seq2SeqTrainingArguments(
             output_dir=str(args.work),
-            per_device_train_batch_size=2,
-            per_device_eval_batch_size=2,
-            gradient_accumulation_steps=8,
+            per_device_train_batch_size=args.batch,
+            per_device_eval_batch_size=args.batch,
+            gradient_accumulation_steps=16 // args.batch,
+            optim=args.optim,
             learning_rate=3e-4,
             num_train_epochs=args.epochs,
             eval_strategy="epoch",
