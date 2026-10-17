@@ -86,7 +86,7 @@ async def create_share(data: ShareIn, request: Request):
         if not (await bump(f"ip:{ip}:publish:{key}", limit, window, endpoint="publish")).allowed:
             raise HTTPException(429, message)
     try:
-        slug = shares.create(data.state, data.bill_no, data.title, data.source_url, data.payload)
+        slug = await shares.create(data.state, data.bill_no, data.title, data.source_url, data.payload)
     except ValueError as exc:
         raise HTTPException(413, str(exc)) from exc
     return {"slug": slug}

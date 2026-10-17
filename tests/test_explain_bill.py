@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 from billbreaker.api import explain as explain_api
@@ -27,7 +28,7 @@ def test_rejects_oversize_text(client):
 
 
 def test_serves_the_cache_as_sse_without_auth(client):
-    analysis_cache.save("US", "HR1", analysis_cache.hash_text(TEXT), "Cached", None, [{"event": "quick_take", "data": QUICK}])
+    asyncio.run(analysis_cache.save("US", "HR1", analysis_cache.hash_text(TEXT), "Cached", None, [{"event": "quick_take", "data": QUICK}]))
     res = post(client)
     assert res.status_code == 200
     assert res.headers["content-type"].startswith("text/event-stream")
@@ -35,7 +36,7 @@ def test_serves_the_cache_as_sse_without_auth(client):
 
 
 def test_serves_the_cache_as_json_with_rendered_html(client):
-    analysis_cache.save("US", "HR1", analysis_cache.hash_text(TEXT), "Cached bill", "https://example", [{"event": "quick_take", "data": QUICK}])
+    asyncio.run(analysis_cache.save("US", "HR1", analysis_cache.hash_text(TEXT), "Cached bill", "https://example", [{"event": "quick_take", "data": QUICK}]))
     body = post(client, mode="json").json()
     assert body["title"] == "Cached bill"
     assert body["cached"] is True
@@ -52,7 +53,7 @@ def test_rate_limit_returns_429_with_retry_after(client):
 
 
 def test_rate_limit_fails_closed_when_the_store_errors(client, monkeypatch):
-    def broken(*args):
+    async def broken(*args):
         raise RuntimeError("db down")
 
     monkeypatch.setattr("billbreaker.services.rate_limit._bump", broken)
@@ -63,7 +64,7 @@ def test_rate_limit_fails_closed_when_the_store_errors(client, monkeypatch):
 
 def test_falls_back_to_the_last_analysis_when_ai_fails(client):
     other = "w" * 300
-    analysis_cache.save("US", "HR1", analysis_cache.hash_text(other), "Old title", "https://old", [{"event": "quick_take", "data": QUICK}])
+    asyncio.run(analysis_cache.save("US", "HR1", analysis_cache.hash_text(other), "Old title", "https://old", [{"event": "quick_take", "data": QUICK}]))
     body = post(client, mode="json").json()
     assert body["cached"] is True
     assert body["title"] == "Old title"
@@ -84,7 +85,7 @@ def test_fetches_the_text_when_none_is_pasted(client, monkeypatch):
         return FetchResult(TEXT, "https://www.congress.gov/x", "congress.gov", ["congress.gov"])
 
     monkeypatch.setattr(explain_api, "fetch_bill_text", fake_fetch)
-    analysis_cache.save("US", "HR1", analysis_cache.hash_text(TEXT), "Fetched", None, [{"event": "quick_take", "data": QUICK}])
+    asyncio.run(analysis_cache.save("US", "HR1", analysis_cache.hash_text(TEXT), "Fetched", None, [{"event": "quick_take", "data": QUICK}]))
     body = post(client, text="", mode="json").json()
     assert body["title"] == "Fetched"
     assert body["source"] == "congress.gov"

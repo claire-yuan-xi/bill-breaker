@@ -4,7 +4,7 @@ import json
 import secrets
 from datetime import datetime, timezone
 
-from ..db import connection
+from .. import db
 
 SLUG_CHARS = "abcdefghjkmnpqrstuvwxyz23456789"
 MAX_PAYLOAD_BYTES = 200_000
@@ -14,29 +14,25 @@ def random_slug(length: int = 8) -> str:
     return "".join(secrets.choice(SLUG_CHARS) for _ in range(length))
 
 
-def create(state: str, bill_no: str, title: str | None, source_url: str | None, payload: dict) -> str:
+async def create(state: str, bill_no: str, title: str | None, source_url: str | None, payload: dict) -> str:
     body = json.dumps(payload)
     if len(body) > MAX_PAYLOAD_BYTES:
         raise ValueError(f"Payload too large (max {MAX_PAYLOAD_BYTES} bytes).")
     now = datetime.now(timezone.utc).isoformat()
-    with connection() as db:
-        for _ in range(5):
-            slug = random_slug()
-            exists = db.execute("SELECT 1 FROM shared_analyses WHERE slug = ?", (slug,)).fetchone()
-            if exists:
-                continue
-            db.execute(
-                "INSERT INTO shared_analyses (slug, state, bill_no, title, source_url, payload, "
-                "created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (slug, state, bill_no, title, source_url, body, now),
-            )
+    for _ in range(5):
+        slug = random_slug()
+        inserted = await db.query(
+            "INSERT INTO shared_analyses (slug, state, bill_no, title, source_url, payload, "
+            "created_at) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(slug) DO NOTHING RETURNING slug",
+            (slug, state, bill_no, title, source_url, body, now),
+        )
+        if inserted:
             return slug
     raise RuntimeError("Could not generate share link, try again.")
 
 
-def get(slug: str) -> dict | None:
-    with connection() as db:
-        row = db.execute("SELECT * FROM shared_analyses WHERE slug = ?", (slug,)).fetchone()
+async def get(slug: str) -> dict | None:
+    row = await db.query_one("SELECT * FROM shared_analyses WHERE slug = ?", (slug,))
     if not row:
         return None
     out = dict(row)

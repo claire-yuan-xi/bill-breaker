@@ -60,14 +60,14 @@ async def status():
 async def pull(data: Device):
     if not settings.cloud_sync:
         return {"items": []}
-    return {"items": device_watchlist.pull(data.device_id)}
+    return {"items": await device_watchlist.pull(data.device_id)}
 
 
 @router.post("/push")
 async def push(data: PushIn, request: Request):
     _require_cloud()
     await _throttle(request, "push")
-    device_watchlist.upsert(data.device_id, [data.model_dump()])
+    await device_watchlist.upsert(data.device_id, [data.model_dump()])
     return {"ok": True}
 
 
@@ -75,7 +75,7 @@ async def push(data: PushIn, request: Request):
 async def remove(data: RemoveIn, request: Request):
     _require_cloud()
     await _throttle(request, "remove")
-    device_watchlist.remove(data.device_id, data.state, data.bill_no)
+    await device_watchlist.remove(data.device_id, data.state, data.bill_no)
     return {"ok": True}
 
 
@@ -83,5 +83,5 @@ async def remove(data: RemoveIn, request: Request):
 async def bulk(data: BulkIn, request: Request):
     _require_cloud()
     await _throttle(request, "bulk")
-    count = device_watchlist.upsert(data.device_id, [i.model_dump() for i in data.items])
+    count = await device_watchlist.upsert(data.device_id, [i.model_dump() for i in data.items])
     return {"ok": True, "count": count}

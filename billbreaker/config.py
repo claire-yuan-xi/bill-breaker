@@ -21,11 +21,18 @@ class Settings:
     openstates_api_key: str
     ml_endpoint: str
     database_path: Path
+    turso_url: str
+    turso_token: str
     cloud_sync: bool
     abuse_admin_token: str
     abuse_alert_webhook_url: str
     abuse_alert_threshold: int
     abuse_alert_cooldown_s: int
+
+
+def _default_db() -> str:
+    # Serverless hosts only allow writes under /tmp; Turso is the durable option there.
+    return "/tmp/billbreaker.db" if os.getenv("VERCEL") else str(ROOT / "data" / "billbreaker.db")
 
 
 def load_settings() -> Settings:
@@ -34,7 +41,9 @@ def load_settings() -> Settings:
         gemini_model=os.getenv("GEMINI_MODEL", "gemini-flash-latest"),
         openstates_api_key=os.getenv("OPENSTATES_API_KEY", ""),
         ml_endpoint=os.getenv("ML_ENDPOINT", ""),
-        database_path=Path(os.getenv("DATABASE_PATH", str(ROOT / "data" / "billbreaker.db"))),
+        database_path=Path(os.getenv("DATABASE_PATH", "") or _default_db()),
+        turso_url=os.getenv("TURSO_DATABASE_URL", ""),
+        turso_token=os.getenv("TURSO_AUTH_TOKEN", ""),
         cloud_sync=_flag("CLOUD_SYNC"),
         abuse_admin_token=os.getenv("ABUSE_ADMIN_TOKEN", ""),
         abuse_alert_webhook_url=os.getenv("ABUSE_ALERT_WEBHOOK_URL", ""),
