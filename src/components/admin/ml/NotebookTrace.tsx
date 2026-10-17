@@ -17,32 +17,16 @@ export function NotebookTrace() {
   );
   return (
     <>
-      <Panel
-        step="03 · Reader"
-        title="Who it's explaining to"
-        note="Answers to the optional questions turn into search terms. A Colorado college student, from the notebook run."
-      >
+      <Panel step="03 · Reader" title="Who it's explaining to">
         <ReaderTerms profile={EXAMPLE_PROFILE} terms={profileTerms(EXAMPLE_PROFILE)} />
       </Panel>
-      <Panel
-        step="04 · Ranking"
-        title={`What matters in ${EXAMPLE_RUN.title}`}
-        note="Each section is scored by how often the reader's terms appear. The top three go to the personalizer."
-      >
+      <Panel step="04 · Ranking" title={`What matters in ${EXAMPLE_RUN.title}`}>
         <SectionTable rows={EXAMPLE_RUN.sections} />
       </Panel>
-      <Panel
-        step="05 · Summary"
-        title="General summary"
-        note="Written by the fine-tuned FLAN-T5; the same for every reader."
-      >
+      <Panel step="05 · Summary" title="General summary">
         <p className="max-w-3xl text-sm leading-relaxed">{EXAMPLE_RUN.general}</p>
       </Panel>
-      <Panel
-        step="06 · Personalized + checked"
-        title="What the reader would see"
-        note="Each sentence of the personalizer's output is checked against the summary and sections it was given. Red lines add effects, numbers or opinions the bill doesn't support."
-      >
+      <Panel step="06 · Personalized + checked" title="What the reader would see">
         <ClaimsView report={report} />
       </Panel>
     </>

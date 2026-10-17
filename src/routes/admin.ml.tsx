@@ -46,29 +46,17 @@ function AdminMlPage() {
           </div>
         </div>
 
-        <Panel
-          step="01 · Quality"
-          title="Fine-tuning doubled summary overlap"
-          note="Scores from the Colab run; they update when the model is retrained."
-        >
+        <Panel step="01 · Quality" title="Fine-tuning doubled summary overlap">
           <ModelScorecard />
         </Panel>
 
-        <Panel
-          step="02 · Samples"
-          title="Model output next to the official summary"
-          note="First three held-out bills. The notebook printed these cut short."
-        >
+        <Panel step="02 · Samples" title="Model output next to the official summary">
           <SampleOutputs />
         </Panel>
 
         <NotebookTrace />
 
-        <Panel
-          step="07 · Try it"
-          title="Run the pipeline on any bill"
-          note="Section ranking runs here in your browser. Generating the explanation needs the hosted model."
-        >
+        <Panel step="07 · Try it" title="Run the pipeline on any bill">
           <Playground />
         </Panel>
       </div>
