@@ -14,3 +14,6 @@ _parallel-draft/
 ml/bill_breaker_model/
 ml/.work/
 __pycache__/
+ml/.onnx/
+ml/.onnx_pc/
+ml/.onnx_upload/
