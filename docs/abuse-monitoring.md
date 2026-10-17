@@ -1,63 +1,42 @@
-# Abuse Monitoring & Alerting
+# Abuse monitoring
 
-This app is anonymous-by-design — there are no user accounts gating
-`/api/explain-bill`, watchlist sync, or publishing. Abuse is detected with
-per-IP rate limits backed by Postgres (`bump_rate_limit` RPC). This doc
-describes the optional alerting and admin-debug surface layered on top.
+The site has no accounts, so abuse is caught with per-IP rate limits stored in
+SQLite (`billbreaker/services/rate_limit.py`). This page covers the alerting
+and the admin page layered on top.
 
-## What's always on
+## Always on
 
-- **Per-IP rate limits** on writes / AI calls. Failures are _fail-closed_
-  (block the request) so a DB outage can't be used to bypass throttling.
-- **Structured logs.** Every `near_limit`, `limit_exceeded`, `rpc_error`,
-  and `exception` is written as a single JSON line prefixed `[abuse]`.
-  Greppable in any log drain.
-- **Event persistence.** The same events are inserted into the
-  `abuse_events` table (service-role only) for the admin debug page.
+- Per-IP limits on AI calls and publishing. They fail closed: if the store
+  errors, the request is blocked, so an outage cannot be used to skip throttling.
+- Structured logs. Every `near_limit`, `limit_exceeded` and `exception` event is
+  one JSON line prefixed `[abuse]`.
+- The same events are stored in the `abuse_events` table for the admin page.
 
-## Optional configuration (secrets)
+## Settings
 
-| Secret                    | Required?                | Default                | Purpose                                                       |
-| ------------------------- | ------------------------ | ---------------------- | ------------------------------------------------------------- |
-| `ABUSE_ALERT_WEBHOOK_URL` | No                       | _(unset → no webhook)_ | HTTPS URL to POST alerts to (Slack/Discord/Sentry-compatible) |
-| `ABUSE_ALERT_THRESHOLD`   | No                       | `5`                    | Incidents per identifier per hour before alerting             |
-| `ABUSE_ALERT_COOLDOWN_S`  | No                       | `3600`                 | Min seconds between alerts for the same identifier            |
-| `ABUSE_ADMIN_TOKEN`       | Yes (for `/admin/abuse`) | _(auto-generated)_     | Bearer-style token gating the admin page                      |
+| Variable                  | Default | Purpose                                                  |
+| ------------------------- | ------- | -------------------------------------------------------- |
+| `ABUSE_ALERT_WEBHOOK_URL` | unset   | HTTPS URL to POST alerts to (Slack or Discord compatible) |
+| `ABUSE_ALERT_THRESHOLD`   | `5`     | Incidents per identifier per hour before alerting         |
+| `ABUSE_ALERT_COOLDOWN_S`  | `3600`  | Minimum seconds between alerts for the same identifier    |
+| `ABUSE_ADMIN_TOKEN`       | unset   | Token for `/admin/abuse` (at least 16 characters)         |
 
-### What happens when a secret is missing
+A missing or non-https webhook turns alerts off; limits, logs and stored events
+keep working. Without `ABUSE_ADMIN_TOKEN`, `/admin/abuse` says the token is not
+configured.
 
-- **`ABUSE_ALERT_WEBHOOK_URL` missing or not `https://…`** — `maybeAlert()`
-  short-circuits silently. The server logs one info-level line on first call
-  (`webhook alerts disabled`). Rate limiting, logging, and event persistence
-  still work.
-- **`ABUSE_ALERT_THRESHOLD` / `ABUSE_ALERT_COOLDOWN_S` missing** — defaults
-  apply. Non-numeric values fall back to the defaults via `Number()` + `??`.
-- **`ABUSE_ADMIN_TOKEN` missing** — `/admin/abuse` returns
-  `"ABUSE_ADMIN_TOKEN not configured on the server."` for every load attempt.
+## Webhook delivery
 
-## Webhook reliability
+`maybe_alert()` calls `post_with_retry()` in `billbreaker/services/abuse.py`:
+three attempts with exponential backoff and jitter, a 4 second timeout each,
+retries only on 5xx, 408 and 429, and it never raises.
 
-`maybeAlert()` calls `postWebhookWithRetry()`:
+## Admin page
 
-- 3 attempts by default, exponential backoff (`250ms → 500ms → 1000ms`)
-  with jitter.
-- 4 second per-attempt timeout via `AbortController`.
-- Retries `5xx`, `408`, `429`. Does **not** retry other `4xx` (your
-  webhook said "no" — don't keep trying).
-- Never throws — failures only log. **Rate limiting always continues
-  to work**, even if the webhook endpoint is down or wrong.
-
-## Admin debugging page
-
-`/admin/abuse` shows the last 200 events (timestamp, reason, identifier,
-endpoint, count / limit, window). It's gated by `ABUSE_ADMIN_TOKEN`:
-paste the token into the page (stored in `sessionStorage` for the tab).
-The route is `ssr: false` and `<meta name="robots" content="noindex">`.
+`/admin/abuse` shows the last 200 events. Paste the token into the page; it is
+kept in `sessionStorage` for that tab only. The page is marked `noindex`.
 
 ## Tests
 
-- `src/lib/__tests__/abuse-alert.test.ts` — threshold gating, per-identifier
-  cooldown, retry/backoff, safe failure when the webhook is down or misconfigured.
-- `src/lib/__tests__/anon-postgrest.integration.test.ts` — verifies anon
-  PostgREST returns only `user_id IS NULL` rows from `bills` and an empty set
-  from `device_watchlist`. Auto-skipped when Supabase env vars aren't set.
+`tests/test_abuse_alert.py` covers threshold gating, the per-identifier
+cooldown, the https-only webhook rule and the token check.

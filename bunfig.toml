@@ -1,3 +1,0 @@
-[install]
-# Skip package versions published less than a day ago.
-minimumReleaseAge = 86400
