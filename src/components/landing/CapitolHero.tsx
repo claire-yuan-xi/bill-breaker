@@ -152,16 +152,17 @@ export function CapitolHero({ onSearch, onPaste }: Props) {
       >
         <h1
           id="hero-title"
-          className="font-serif text-6xl font-bold leading-[0.95] tracking-tight mix-blend-overlay md:text-9xl"
+          className="font-serif text-6xl font-bold leading-[1.02] tracking-tight mix-blend-overlay md:text-9xl"
         >
-          <span className="block overflow-hidden pb-1">
+          {/* Room under each line so descenders (g) clear the reveal mask. */}
+          <span className="block overflow-hidden pb-[0.18em]">
             <span data-hero-line className="block">
-              Legislation,
+              Legislation
             </span>
           </span>
-          <span className="block overflow-hidden pb-2">
+          <span className="block overflow-hidden pb-[0.18em]">
             <span data-hero-line className="block">
-              in plain English.
+              in plain English
             </span>
           </span>
         </h1>

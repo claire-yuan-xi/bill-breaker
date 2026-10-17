@@ -79,18 +79,12 @@ export function SearchDialog({ open, mode, onOpenChange, onModeChange }: Props) 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[92svh] w-[calc(100vw-2rem)] max-w-2xl overflow-y-auto rounded-none border-foreground bg-background p-0 sm:max-w-2xl">
-        <div className="flex items-center gap-3 border-b border-border px-6 py-4 pr-14 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-          <span className={step === "bill" ? "text-foreground" : ""}>1 · the bill</span>
-          <span aria-hidden="true">—</span>
-          <span className={step === "about" ? "text-foreground" : ""}>2 · about you</span>
-        </div>
-
         {step === "bill" ? (
           <form onSubmit={toAbout} className="px-6 pb-6 pt-6 md:px-8">
             <div ref={stepRef} className="space-y-6">
               <div>
                 <DialogTitle className="font-serif text-4xl font-bold tracking-tight">
-                  Which bill?
+                  Which bill
                 </DialogTitle>
                 <DialogDescription className="sr-only">
                   Enter a bill number or paste its text.
@@ -168,9 +162,7 @@ export function SearchDialog({ open, mode, onOpenChange, onModeChange }: Props) 
                         (trimmed && !billValid ? "text-destructive" : "text-muted-foreground")
                       }
                     >
-                      {trimmed && !billValid
-                        ? "Try a prefix and number, like HR 1234."
-                        : "Prefix and number, like HR 1234."}
+                      {trimmed && !billValid ? "Try something like HR 1234" : "Like HR 1234"}
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {EXAMPLES.map((ex) => (
@@ -197,7 +189,7 @@ export function SearchDialog({ open, mode, onOpenChange, onModeChange }: Props) 
                     autoFocus
                     value={text}
                     onChange={(e) => setText(e.target.value.slice(0, 50000))}
-                    placeholder="Paste the full bill text from Congress.gov or your state legislature…"
+                    placeholder="Paste bill text"
                     className="h-56 w-full resize-none bg-transparent p-4 text-sm leading-relaxed outline-none placeholder:text-muted-foreground"
                   />
                 </div>
@@ -223,9 +215,7 @@ export function SearchDialog({ open, mode, onOpenChange, onModeChange }: Props) 
                 <DialogTitle className="font-serif text-4xl font-bold tracking-tight">
                   About you
                 </DialogTitle>
-                <DialogDescription className="mt-2 text-sm">
-                  All optional. Stays in this tab.
-                </DialogDescription>
+                <DialogDescription className="mt-2 text-sm">All optional</DialogDescription>
               </div>
 
               <div className="space-y-5">
