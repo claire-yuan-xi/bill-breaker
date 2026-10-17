@@ -1,5 +1,5 @@
-# Regenerate public/images/capitol-depth.png after changing the hero photo:
-#   python3 scripts/make-depth-map.py public/images/capitol.jpg public/images/capitol-depth.png
+# Regenerate billbreaker/static/images/capitol-depth.png after changing the hero photo:
+#   python3 scripts/make-depth-map.py billbreaker/static/images/capitol.jpg billbreaker/static/images/capitol-depth.png
 # Needs Pillow and numpy. The sky/dome thresholds are tuned for the current photo.
 # Builds a depth + sky mask for the Capitol photo: R = depth (white = near), G = sky.
 import sys
