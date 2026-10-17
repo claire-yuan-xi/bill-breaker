@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.output/
+.tanstack/
+.wrangler/
+.vinxi/
+.env
+.env.*
+.DS_Store
+_parallel-draft/
+*.tgz
