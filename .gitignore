@@ -9,3 +9,8 @@ dist/
 .DS_Store
 _parallel-draft/
 *.tgz
+
+# Local model training output
+ml/bill_breaker_model/
+ml/.work/
+__pycache__/
