@@ -12,8 +12,8 @@ export function useSmoothScroll() {
   useEffect(() => {
     if (prefersReducedMotion()) return;
     const lenis = new Lenis({
-      lerp: 0.085,
-      wheelMultiplier: 0.9,
+      lerp: 0.14,
+      wheelMultiplier: 1.2,
       // The news rail and any scrollable dialog keep their own native scrolling.
       allowNestedScroll: true,
       autoRaf: false,

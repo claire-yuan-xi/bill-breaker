@@ -51,7 +51,7 @@ export function SavedBillsButton({
         <SheetContent side="right" className="flex w-full flex-col overflow-y-auto sm:max-w-md">
           <SheetHeader>
             <SheetTitle className="font-serif text-3xl font-bold">Saved bills</SheetTitle>
-            <SheetDescription>
+            <SheetDescription className="sr-only">
               {items.length === 0
                 ? "Bills you save show up here."
                 : `${items.length} saved in this browser.`}
