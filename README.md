@@ -1,13 +1,11 @@
 # Bill Breaker
 
-Plain-language explanations of US federal and state bills, with live AP
-legislation headlines, saved bills, share links and an admin view of the
-fine-tuned model.
+Free website that lets anyone look up a federal or state bill and get a plain English breakdown of what it does and how it affects them, alongside live news from Congress sourced from AP News. 
 
 ## Stack
 
 - Python: FastAPI server, Jinja HTML templates, SQLite (Turso when deployed)
-  for the cache, share links and rate limits (`billbreaker/`)
+  For the cache, share links and rate limits (`billbreaker/`)
 - Notebooks: the model training notebook and a walkthrough of the site's
   pipeline (`notebooks/`)
 - Browser: small JavaScript modules for animation (GSAP, Lenis) and the
@@ -15,26 +13,7 @@ fine-tuned model.
 
 ## Run it
 
-```sh
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements-dev.txt
-cp .env.example .env        # add GEMINI_API_KEY for the AI breakdown
-uvicorn billbreaker.main:app --reload --port 3000
-```
-
-Open http://localhost:3000.
-
-## Common tasks
-
-| Task                   | Command                                   |
-| ---------------------- | ----------------------------------------- |
-| Run the tests          | `pytest`                                  |
-| Rebuild the CSS        | `scripts/build-css.sh` (add `--watch`)    |
-| Open the notebooks     | `jupyter lab notebooks`                   |
-| Regenerate depth map   | `python3 scripts/make-depth-map.py ...`   |
-
-`billbreaker/static/css/app.css` is committed, so the CSS only needs a rebuild
-after changing classes in templates or JS.
+```billbreaker.org```
 
 ## Layout
 
